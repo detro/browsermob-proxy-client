@@ -1,0 +1,176 @@
+/*
+This file is part of the BrowserMob Proxy Client project by Ivan De Marino (http://ivandemarino.me).
+
+Copyright (c) 2014, Ivan De Marino (http://ivandemarino.me)
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice,
+      this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright notice,
+      this list of conditions and the following disclaimer in the documentation
+      and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+apply plugin: "java"
+apply plugin: "idea"
+apply plugin: "eclipse"
+apply plugin: "maven"
+apply plugin: "signing"
+
+project.buildDir = "gradle/build"
+
+task wrapper(type: Wrapper) {
+    gradleVersion = "1.11"
+    jarFile = "gradle/gradle-wrapper.jar"
+}
+
+repositories {
+    mavenCentral()
+}
+
+project.ext {
+    projectLongName         = "BrowserMob Proxy Client"
+    projectArtefactDir      = "jars/"
+    projectCreator          = "Ivan De Marino (https://github.com/detro)"
+    projectGroupId          = "com.github.detro"
+    projectArtifactId       = "browser-proxy-client"
+
+    testngVersion           = "6.8.8"
+    gsonVersion             = "2.2.4"
+    jsonPathVersion         = "0.9.1"
+    seleniumVersion         = "2.40.0"
+    httpclientVersion       = "4.3.3"
+}
+
+dependencies {
+    compile "com.google.code.gson:gson:$gsonVersion"
+    compile "com.jayway.jsonpath:json-path:$jsonPathVersion"
+    compile "org.seleniumhq.selenium:selenium-java:$seleniumVersion"
+    compile "org.apache.httpcomponents:httpclient:$httpclientVersion"
+
+    testCompile "org.testng:testng:$testngVersion"
+}
+
+tasks.withType(JavaExec) {
+    classpath = configurations.compile + sourceSets.test.output
+    args project.hasProperty("args") ? project.args.split("\\s") : []
+}
+
+test {
+    // TestNG specific options
+    maxParallelForks = 4
+    useTestNG()
+
+    // Listening to test execution events
+    beforeTest { descriptor ->
+        logger.lifecycle("Running " + descriptor)
+    }
+}
+
+// Collect Build Information
+task buildInfo {
+    def cmdOutput = "git describe --tags --match [0-9]*-release".execute().text
+
+    ext.buildVersion = cmdOutput.toString().trim().replaceAll("-release", "")
+    ext.buildVersionMajor = buildVersion.replaceAll("^(\\d+).*\$", "\$1")
+    ext.buildVersionMinor = buildVersion.replaceAll("^\\d+\\.(\\d+).*\$", "\$1")
+    ext.buildVersionRev = buildVersion.replaceAll("^\\d+\\.\\d+\\.(\\d+).*\$", "\$1")
+    ext.buildTimestamp = (int)(new Date().getTime()/1000)
+
+    project.version = ext.buildVersion
+
+    // println("* Version: " + ext.buildVersion)
+    // println("** Major: " + ext.buildVersionMajor)
+    // println("** Minor: " + ext.buildVersionMinor)
+    // println("** Revision: " + ext.buildVersionRev)
+}
+
+// Binary Jar
+jar {
+    dependsOn buildInfo
+
+    // destination directory for the jar
+    destinationDir = file(projectArtefactDir)
+
+    // get the version
+    version = buildInfo.buildVersion
+
+    // manifest definition
+    manifest {
+        attributes(
+            "Implementation-Title"      : projectLongName,
+            "Implementation-Version"    : buildInfo.buildVersion,
+            "Gradle-Version"            : project.gradle.gradleVersion,
+            "Created-By"                : projectCreator
+        )
+    }
+}
+
+// Source Jar
+task sourcesJar(type: Jar, dependsOn: [classes, buildInfo]) {
+    classifier = "sources"
+    from sourceSets.main.allSource
+
+    // destination directory for the jar
+    destinationDir      = file(projectArtefactDir)
+
+    // get the version
+    version = buildInfo.buildVersion
+
+    // manifest definition
+    manifest {
+        attributes(
+            "Implementation-Title"      : projectLongName,
+            "Implementation-Version"    : buildInfo.buildVersion,
+            "Gradle-Version"            : project.gradle.gradleVersion,
+            "Created-By"                : projectCreator
+        )
+    }
+}
+
+// JavaDoc Jar
+task javadocJar(type: Jar, dependsOn: [javadoc, buildInfo]) {
+    classifier = "javadoc"
+    from javadoc.destinationDir
+
+    // destination directory for the jar
+    destinationDir      = file(projectArtefactDir)
+
+    // get the version
+    version = buildInfo.buildVersion
+
+    // manifest definition
+    manifest {
+        attributes(
+            "Implementation-Title"      : projectLongName,
+            "Implementation-Version"    : buildInfo.buildVersion,
+            "Gradle-Version"            : project.gradle.gradleVersion,
+            "Created-By"                : projectCreator
+        )
+    }
+}
+
+// Make all Jars
+task jars {
+    dependsOn jar, sourcesJar, javadocJar
+}
+
+// Store JavaDoc
+task storeJavadoc(type: Sync, dependsOn: javadoc) {
+    from project.docsDir
+    into "docs"
+}
