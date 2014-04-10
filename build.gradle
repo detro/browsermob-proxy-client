@@ -174,3 +174,75 @@ task storeJavadoc(type: Sync, dependsOn: javadoc) {
     from project.docsDir
     into "docs"
 }
+
+// Artifact-making Tasks
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+}
+
+// Sign artifacts
+signing {
+    sign configurations.archives
+}
+
+// Upload archives to OSS Sonatype
+//
+// NOTE: requires you to first setup
+// 1) ~/.gnupg/* with a PGP key to sign the artifacts
+// 2) ~/.gradle/gradle.properties defining
+//
+//    signing.keyId=<YOUR PGP KEY ID>
+//    signing.password=<PASSWORD TO PGP SECRET RING>
+//    signing.secretKeyRingFile=<FULLPATH TO PGP SECRET RING>
+//    ossrhUsername=<OSS Sonatype Username>
+//    ossrhPassword=<OSS Sonatype Password>
+//
+uploadArchives {
+    dependsOn buildInfo
+
+    repositories {
+        mavenDeployer {
+            beforeDeployment {
+                MavenDeployment deployment -> signing.signPom(deployment)
+            }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name "BrowserMob Proxy Client"
+                groupId projectGroupId
+                artifactId projectArtifactId
+                version buildInfo.buildVersion
+                packaging "jar"
+
+                description "Java client library to install, launch and control a BrowserMob Proxy exclusively via it's REST API"
+                url "https://github.com/detro/browsermob-proxy-client"
+
+                scm {
+                    connection "https://github.com/detro/browsermob-proxy-client.git"
+                    developerConnection "git@github.com:detro/browsermob-proxy-client.git"
+                    url "https://github.com/detro/browsermob-proxy-client"
+                }
+
+                licenses {
+                    license {
+                        name "BSD-2-Clause"
+                        url "https://github.com/detro/jsonconf/blob/master/LICENSE.BSD"
+                    }
+                }
+
+                developers {
+                    developer {
+                        id "detro"
+                        name "Ivan De Marino"
+                        email "detronizator@gmail.com"
+                    }
+                }
+            }
+        }
+    }
+}
