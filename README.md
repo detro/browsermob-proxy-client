@@ -1,7 +1,6 @@
-BrowserMob Proxy Client (for Java)
+# BrowserMob Proxy Client (for Java)
 
 [![Build Status](https://travis-ci.org/detro/browsermob-proxy-client.svg?branch=master)](https://travis-ci.org/detro/browsermob-proxy-client)
-=============================================================================================================================================
 
 Java client library to install, launch and control a BrowserMob Proxy
 exclusively via it's REST API.
