@@ -307,9 +307,7 @@ public class BMPCProxy {
             response.close();
 
             return previousHar;
-        } catch (URISyntaxException e) {
-            throw new BMPCUnableToCreateHarException(e);
-        } catch (IOException e) {
+        } catch (URISyntaxException|IOException e) {
             throw new BMPCUnableToCreateHarException(e);
         }
     }
@@ -357,9 +355,7 @@ public class BMPCProxy {
             // Close HTTP Response
             response.close();
 
-        } catch (URISyntaxException e) {
-            throw new BMPCUnableToCreateHarException(e);
-        } catch (IOException e) {
+        } catch (URISyntaxException|IOException e) {
             throw new BMPCUnableToCreateHarException(e);
         }
     }
@@ -388,9 +384,7 @@ public class BMPCProxy {
             response.close();
 
             return har;
-        } catch (URISyntaxException e) {
-            throw new BMPCUnableToCreateHarException(e);
-        } catch (IOException e) {
+        } catch (URISyntaxException|IOException e) {
             throw new BMPCUnableToCreateHarException(e);
         }
     }
@@ -424,9 +418,7 @@ public class BMPCProxy {
 
             // Close HTTP Client
             HTTPclient.close();
-        } catch (URISyntaxException e) {
-            throw new BMPCUnableToCloseProxyException(e);
-        } catch (IOException e) {
+        } catch (URISyntaxException|IOException e) {
             throw new BMPCUnableToCloseProxyException(e);
         }
     }

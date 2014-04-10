@@ -98,8 +98,7 @@ public class BMPCSimpleManager implements BMPCManager {
                 throw new BMPCUnexpectedErrorException(String.format(
                         "Can't fetch list of Open Proxies from '%s:%d'." +
                                 " Status code: %d",
-                        APIHost, APIPort, statusCode
-                ));
+                        APIHost, APIPort, statusCode));
             }
 
             // Parse JSON response and check it's valid
@@ -115,9 +114,7 @@ public class BMPCSimpleManager implements BMPCManager {
             for (JsonElement proxy : proxyList) {
                 openProxiesPorts.add(proxy.getAsJsonObject().getAsJsonPrimitive("port").getAsInt());
             }
-        } catch (URISyntaxException e) {
-            throw new BMPCUnexpectedErrorException(e);
-        } catch (IOException e) {
+        } catch (URISyntaxException |IOException e) {
             throw new BMPCUnexpectedErrorException(e);
         }
 
