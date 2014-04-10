@@ -246,3 +246,9 @@ uploadArchives {
         }
     }
 }
+
+// Forces Java 6 compile source/target
+compileJava {
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+}
