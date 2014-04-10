@@ -247,21 +247,21 @@ public class BMPCProxy {
     }
 
     /**
-     * @see {@link BMPCProxy#newHar(String, boolean, boolean, boolean)}
+     * @see BMPCProxy#newHar(String, boolean, boolean, boolean)
      */
     public JsonObject newHar() {
         return newHar(null, false, false, false);
     }
 
     /**
-     * @see {@link BMPCProxy#newHar(String, boolean, boolean, boolean)}
+     * @see BMPCProxy#newHar(String, boolean, boolean, boolean)
      */
     public JsonObject newHar(String initialPageRef) {
         return newHar(initialPageRef, false, false, false);
     }
 
     /**
-     * @see {@link BMPCProxy#newHar(String, boolean, boolean, boolean)}
+     * @see BMPCProxy#newHar(String, boolean, boolean, boolean)
      */
     public JsonObject newHar(String initialPageRef,
                              boolean captureHeaders) {
@@ -313,7 +313,7 @@ public class BMPCProxy {
     }
 
     /**
-     * @see {@link BMPCProxy#newPage(String)}
+     * @see BMPCProxy#newPage(String)
      */
     public void newPage() {
         newPage(null);
