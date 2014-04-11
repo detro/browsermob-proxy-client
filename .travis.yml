@@ -7,7 +7,5 @@ jdk:
 install:
   - ./gradlew -PossrhUsername=none -PossrhPassword=none jars
 
-# TODO Can't run tests yet as we need to find a way to start a BrowserMob Proxy first
-#  - ./gradlew -PossrhUsername=none -PossrhPassword=none check
 script:
-  - ./gradlew -PossrhUsername=none -PossrhPassword=none tasks
+  - ./gradlew -PossrhUsername=none -PossrhPassword=none check
