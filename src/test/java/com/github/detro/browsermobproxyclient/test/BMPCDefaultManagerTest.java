@@ -27,22 +27,38 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.github.detro.browsermobproxyclient.test;
 
+import com.github.detro.browsermobproxyclient.BMPCDefaultManager;
+import com.github.detro.browsermobproxyclient.BMPCLocalLauncher;
 import com.github.detro.browsermobproxyclient.BMPCManager;
 import com.github.detro.browsermobproxyclient.BMPCProxy;
 
-import com.github.detro.browsermobproxyclient.BMPCSimpleManager;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
-public class BMPCSimpleManagerTest {
+public class BMPCDefaultManagerTest {
 
     public static final String BMOB_API_HOST = "localhost";
-    public static final int BMOB_API_PORT = 8080;
+    public static int BMOB_API_PORT;
+
+    @BeforeClass
+    public void startLocalBMP() {
+        BMPCLocalLauncher.install();
+        BMPCLocalLauncher.start();
+        BMOB_API_PORT = BMPCLocalLauncher.port();
+    }
+
+    @AfterClass
+    public void stopLocalBMP() {
+        BMPCLocalLauncher.stop();
+        BMPCLocalLauncher.uninstall();
+    }
 
     @Test
     public void shouldCreateSimpleManager() {
-        BMPCManager manager = new BMPCSimpleManager(BMOB_API_HOST, BMOB_API_PORT);
+        BMPCManager manager = new BMPCDefaultManager(BMOB_API_HOST, BMOB_API_PORT);
 
         assertNotNull(manager);
         assertEquals(manager.getAPIHost(), BMOB_API_HOST);
@@ -51,7 +67,7 @@ public class BMPCSimpleManagerTest {
 
     @Test
     public void shouldCreateProxy() {
-        BMPCManager manager = new BMPCSimpleManager(BMOB_API_HOST, BMOB_API_PORT);
+        BMPCManager manager = new BMPCDefaultManager(BMOB_API_HOST, BMOB_API_PORT);
 
         BMPCProxy proxy = manager.createProxy();
 
@@ -62,7 +78,7 @@ public class BMPCSimpleManagerTest {
 
     @Test
     public void shouldReturnListOfOpenProxies() {
-        BMPCManager manager = new BMPCSimpleManager(BMOB_API_HOST, BMOB_API_PORT);
+        BMPCManager manager = new BMPCDefaultManager(BMOB_API_HOST, BMOB_API_PORT);
 
         int initialProxiesCount = manager.getOpenProxies().size();
         manager.createProxy();
@@ -79,7 +95,7 @@ public class BMPCSimpleManagerTest {
 
     @Test
     public void shouldCreateProxyThatGoesThroughUpstreamProxy() {
-        BMPCManager manager = new BMPCSimpleManager(BMOB_API_HOST, BMOB_API_PORT);
+        BMPCManager manager = new BMPCDefaultManager(BMOB_API_HOST, BMOB_API_PORT);
 
         BMPCProxy upstreamProxy = manager.createProxy();
         BMPCProxy proxy = manager.createProxy(upstreamProxy.asHostAndPort());

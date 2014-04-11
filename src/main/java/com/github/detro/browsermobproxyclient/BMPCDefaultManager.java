@@ -48,7 +48,7 @@ import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Set;
 
-public class BMPCSimpleManager implements BMPCManager {
+public class BMPCDefaultManager implements BMPCManager {
 
     private static final Gson GSON = new GsonBuilder()
             .serializeNulls()
@@ -59,7 +59,7 @@ public class BMPCSimpleManager implements BMPCManager {
     private final String APIHost;
     private final int APIPort;
 
-    public BMPCSimpleManager(String apiHost, int apiPort) {
+    public BMPCDefaultManager(String apiHost, int apiPort) {
         this.APIHost = apiHost;
         this.APIPort = apiPort;
 
