@@ -31,15 +31,47 @@ import java.util.Set;
 
 public interface BMPCManager {
 
+    /**
+     * Create a new BMPCProxy Instance
+     *
+     * @return New BMPCProxy Instance
+     */
     public BMPCProxy createProxy();
 
+    /**
+     * Create a new BMPCProxy Instance
+     *
+     * @param upstreamProxyHostAndPort Bind the new Proxy instance to
+     *                                 pass through an Upstream Proxy
+     * @return New BMPCProxy Instance
+     */
     public BMPCProxy createProxy(String upstreamProxyHostAndPort);
 
+    /**
+     * Returns list of Proxies currently open (i.e. list of the ports they listen on)
+     *
+     * @return List of Proxies currently open (i.e. list of the ports they listen on)
+     */
     public Set<Integer> getOpenProxies();
 
+    /**
+     * Close all Proxies.
+     *
+     * This will not close the BrowserMob Proxy itself.
+     */
     public void closeAll();
 
+    /**
+     * Returns host where BrowserMob Proxy is running.
+     *
+     * @return Host where BrowserMob Proxy is running.
+     */
     public String getAPIHost();
 
+    /**
+     * Returns port where BrowserMob Proxy is listening.
+     *
+     * @return Port where BrowserMob Proxy is listening.
+     */
     public int getAPIPort();
 }
