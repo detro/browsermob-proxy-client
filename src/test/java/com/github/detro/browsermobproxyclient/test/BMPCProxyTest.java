@@ -27,9 +27,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.github.detro.browsermobproxyclient.test;
 
+import com.github.detro.browsermobproxyclient.BMPCLocalLauncher;
 import com.github.detro.browsermobproxyclient.BMPCProxy;
 import com.github.detro.browsermobproxyclient.exceptions.BMPCUnableToConnectException;
 import com.google.gson.JsonObject;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -37,7 +40,20 @@ import static org.testng.Assert.*;
 public class BMPCProxyTest {
 
     public static final String BMOB_API_HOST = "localhost";
-    public static final int BMOB_API_PORT = 8080;
+    public static int BMOB_API_PORT;
+
+    @BeforeClass
+    public void startLocalBMP() {
+        BMPCLocalLauncher.install();
+        BMPCLocalLauncher.start();
+        BMOB_API_PORT = BMPCLocalLauncher.port();
+    }
+
+    @AfterClass
+    public void stopLocalBMP() {
+        BMPCLocalLauncher.stop();
+        BMPCLocalLauncher.uninstall();
+    }
 
     @Test(expectedExceptions = BMPCUnableToConnectException.class)
     public void shouldFaileIfHostOrPortAreWrong() {
