@@ -112,7 +112,7 @@ public class BMPCLocalLauncher {
             if (!isRunning()) {
                 throw new BMPCLocalStartStopException(failStartExceptionMsg);
             }
-        } catch (IOException|UrlChecker.TimeoutException e) {
+        } catch (IOException | UrlChecker.TimeoutException e) {
             throw new BMPCLocalStartStopException(failStartExceptionMsg, e);
         }
     }
@@ -182,7 +182,7 @@ public class BMPCLocalLauncher {
 
             // Check there is an installed version
             installedVersion();
-        } catch (BMPCLocalNotInstallerException |IOException e) {
+        } catch (BMPCLocalNotInstallerException | IOException e) {
             throw new BMPCUnexpectedErrorException("Installation failed", e);
         }
     }

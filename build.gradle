@@ -72,7 +72,6 @@ tasks.withType(JavaExec) {
 
 test {
     // TestNG specific options
-    maxParallelForks = 4
     useTestNG()
 
     // Listening to test execution events

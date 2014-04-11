@@ -31,7 +31,6 @@ import com.github.detro.browsermobproxyclient.BMPCDefaultManager;
 import com.github.detro.browsermobproxyclient.BMPCLocalLauncher;
 import com.github.detro.browsermobproxyclient.BMPCManager;
 import com.github.detro.browsermobproxyclient.BMPCProxy;
-
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
