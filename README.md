@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/detro/browsermob-proxy-client.svg?branch=master)](https://travis-ci.org/detro/browsermob-proxy-client)
 
-Java client library to install, launch and control a BrowserMob Proxy
+Java client library to install, launch and control a [BrowserMob Proxy](https://github.com/lightbody/browsermob-proxy)
 exclusively via it's REST API.
 
 ## What is it
@@ -32,6 +32,11 @@ compile 'com.github.detro:browsermob-proxy-client:0.0.2'
 
 ### Others
 See [search.maven.org](http://search.maven.org/#search%7Cga%7C1%7Ca%3A%browsermob-proxy-client%22).
+
+## Credits
+
+[BrowserMob Proxy](https://github.com/lightbody/browsermob-proxy) is the key component without which this library
+would make no sense. So, all kudos should go to it. This library is just a bit of "glue" code.
 
 ## License (BSD)
 
