@@ -47,7 +47,7 @@ project.ext {
     projectArtefactDir      = "jars/"
     projectCreator          = "Ivan De Marino (https://github.com/detro)"
     projectGroupId          = "com.github.detro"
-    projectArtifactId       = "browser-proxy-client"
+    projectArtifactId       = "browsermob-proxy-client"
 
     testngVersion           = "6.8.8"
     gsonVersion             = "2.2.4"
