@@ -21,13 +21,13 @@ TODO
 <dependency>
     <groupId>com.github.detro</groupId>
     <artifactId>browsermob-proxy-client</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
 </dependency>
 ```
 
 ### Grails / Gradle
 ```grails
-compile 'com.github.detro:browsermob-proxy-client:0.0.2'
+compile 'com.github.detro:browsermob-proxy-client:0.0.3'
 ```
 
 ### Others
