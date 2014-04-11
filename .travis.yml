@@ -5,7 +5,7 @@ jdk:
   - openjdk7
 
 install:
-  - ./gradlew -PossrhUsername=none -PossrhPassword=none jars
+  - ./gradlew -PossrhUsername=none -PossrhPassword=none --stacktrace jars
 
 script:
-  - ./gradlew -PossrhUsername=none -PossrhPassword=none check
+  - ./gradlew -PossrhUsername=none -PossrhPassword=none --stacktrace check
