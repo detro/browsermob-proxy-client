@@ -5,14 +5,11 @@
 Java client library to install, launch and control a [BrowserMob Proxy](https://github.com/lightbody/browsermob-proxy)
 exclusively via it's REST API.
 
-## What is it
+## How it works
 TODO
 
 ## Documentation
-TODO
-
-## Dependencies
-TODO
+Javadocs for this library can be found [here](https://cdn.rawgit.com/detro/browsermob-proxy-client/master/docs/javadoc/index.html).
 
 ## Include in your project (via Maven Central)
 
@@ -26,7 +23,7 @@ TODO
 ```
 
 ### Grails / Gradle
-```grails
+```groovy
 compile 'com.github.detro:browsermob-proxy-client:0.0.4'
 ```
 
@@ -35,8 +32,9 @@ See [search.maven.org](http://search.maven.org/#search%7Cga%7C1%7Cbrowsermob-pro
 
 ## Credits
 
-[BrowserMob Proxy](https://github.com/lightbody/browsermob-proxy) is the key component without which this library
-would make no sense. So, all kudos should go to it. This library is just a bit of "glue" code.
+* [BrowserMob Proxy](https://github.com/lightbody/browsermob-proxy) is the key component without which this library
+would make no sense. So, all kudos should go to it.
+* [RawGit](https://rawgit.com/) and [MacCDN](http://www.maxcdn.com/) for making it super-easy to host the Javadoc.
 
 ## License (BSD)
 
