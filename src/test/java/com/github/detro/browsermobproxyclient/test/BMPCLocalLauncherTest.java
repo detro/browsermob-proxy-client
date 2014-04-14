@@ -41,6 +41,7 @@ public class BMPCLocalLauncherTest {
 
     @Test
     public void shouldBeAbleToInstallAndUninstall() {
+        BMPCLocalLauncher.uninstall();
         assertFalse(BMPCLocalLauncher.isInstalled());
         BMPCLocalLauncher.install();
         assertTrue(BMPCLocalLauncher.isInstalled());
@@ -81,5 +82,13 @@ public class BMPCLocalLauncherTest {
         assertFalse(BMPCLocalLauncher.isRunning());
 
         BMPCLocalLauncher.uninstall();
+    }
+
+    @Test
+    public void shouldSupportStartingMultipleTimesWithoutIssues() {
+        BMPCLocalLauncher.start();
+        BMPCLocalLauncher.start();
+        BMPCLocalLauncher.start();
+        BMPCLocalLauncher.start();
     }
 }

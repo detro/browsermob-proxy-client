@@ -30,6 +30,7 @@ package com.github.detro.browsermobproxyclient;
 import com.github.detro.browsermobproxyclient.exceptions.BMPCLocalNotInstallerException;
 import com.github.detro.browsermobproxyclient.exceptions.BMPCLocalStartStopException;
 import com.github.detro.browsermobproxyclient.exceptions.BMPCUnexpectedErrorException;
+import org.openqa.selenium.net.PortProber;
 import org.openqa.selenium.net.UrlChecker;
 
 import java.io.File;
@@ -47,12 +48,18 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * Utility class that takes care of Starting and Stopping a Local BrowserMob Proxy.
+ * <p/>
  *
  * "Local" means that it's located inside the Current User directory, inside
  * <code>.browsermob-proxy-client/browsermob-proxy-local</code>.
+ * <p/>
  *
  * A version of BrowserMob Proxy is contained within the resources of this
  * library. This class takes care of installing/uninstalling (zip/delete) it.
+ * <p/>
+ *
+ * NOTE: Only one Local BrowserMob Proxy running per host is supported.
+ * Launching more then one will be ignored in the current implementation.
  */
 public class BMPCLocalLauncher {
 
@@ -86,15 +93,22 @@ public class BMPCLocalLauncher {
      * @param port Port to which BrowserMob Proxy needs to bind it's API
      */
     public synchronized static void start(int port) {
-        // Ensure Local BrowserMob Proxy is installed
-        if (!isInstalled()) {
-            install();
-        }
+        // No-Op if already running
+        if (isRunning()) return;
 
+        // Ensure Local BrowserMob Proxy is installed
+        install();
+
+        final String failStartExceptionMsg = "Failed to start Local BrowserMob Proxy.";
+
+        // Check port we want to bind to is free before continuing
+        if (!PortProber.pollPort(port)) {
+            throw new BMPCLocalStartStopException(failStartExceptionMsg +
+                String.format(" - Port %d is not free", port));
+        }
         BMPPort = port;
 
         // Start Local BrowserMob Proxy external process
-        String failStartExceptionMsg = "Failed to start Local BrowserMob Proxy";
         try {
             BMPProcess = new ProcessBuilder(executablePerOS(),
                         "-port",
@@ -152,7 +166,7 @@ public class BMPCLocalLauncher {
      *
      * @return Port on which Local BrowserMob Proxy is running
      */
-    public static int port() {
+    public synchronized static int port() {
         return BMPPort;
     }
 
@@ -162,7 +176,7 @@ public class BMPCLocalLauncher {
      * @return Returns "true" if a Local BrowserMob Proxy is installed,
      *         "false" otherwise.
      */
-    public static boolean isInstalled() {
+    public synchronized static boolean isInstalled() {
         File installDir = new File(BMP_LOCAL_INSTALL_DIR);
         return installDir.exists() && installDir.isDirectory();
     }
@@ -170,27 +184,29 @@ public class BMPCLocalLauncher {
     /**
      * Install Local BrowserMob Proxy.
      */
-    public static void install() {
-        InputStream is = BMPCLocalLauncher.class.getResourceAsStream(BMP_LOCAL_ZIP_RES);
-        try {
-            // Unzip BrowserMob Proxy contained in the project "/resources"
-            unzip(is, BMPC_USER_DIR);
+    public synchronized static void install() {
+        if (!isInstalled()) {
+            InputStream is = BMPCLocalLauncher.class.getResourceAsStream(BMP_LOCAL_ZIP_RES);
+            try {
+                // Unzip BrowserMob Proxy contained in the project "/resources"
+                unzip(is, BMPC_USER_DIR);
 
-            // Set executable permissions on the BrowserMob Proxy lanching scripts
-            new File(BMP_LOCAL_EXEC_UNIX).setExecutable(true);
-            new File(BMP_LOCAL_EXEC_WIN).setExecutable(true);
+                // Set executable permissions on the BrowserMob Proxy lanching scripts
+                new File(BMP_LOCAL_EXEC_UNIX).setExecutable(true);
+                new File(BMP_LOCAL_EXEC_WIN).setExecutable(true);
 
-            // Check there is an installed version
-            installedVersion();
-        } catch (BMPCLocalNotInstallerException | IOException e) {
-            throw new BMPCUnexpectedErrorException("Installation failed", e);
+                // Check there is an installed version
+                installedVersion();
+            } catch (BMPCLocalNotInstallerException | IOException e) {
+                throw new BMPCUnexpectedErrorException("Installation failed", e);
+            }
         }
     }
 
     /**
      * Uninstall Local BrowserMob Proxy.
      */
-    public static void uninstall() {
+    public synchronized static void uninstall() {
         if (isInstalled()) {
             File installDir = new File(BMP_LOCAL_INSTALL_DIR);
             delete(installDir);
@@ -204,7 +220,7 @@ public class BMPCLocalLauncher {
      *         Throws @see BMPCLocalLauncherNotInstallerException if not installed.
      *         Please use BMPCLocalLauncher#isInstalled() to check first.
      */
-    public static String installedVersion() {
+    public synchronized static String installedVersion() {
         try {
             return Files.readAllLines(Paths.get(BMP_LOCAL_VERSION_FILE), Charset.forName("UTF-8")).get(0);
         } catch (IOException e) {
@@ -230,7 +246,7 @@ public class BMPCLocalLauncher {
      * @param zipFileInputStream Zip File InputStream
      * @param destinationDir Destination Directory
      */
-    private static void unzip(InputStream zipFileInputStream, String destinationDir) throws IOException {
+    private synchronized static void unzip(InputStream zipFileInputStream, String destinationDir) throws IOException {
         // Create output directory if it doesn't exist
         File dir = new File(destinationDir);
         if (!dir.exists()) dir.mkdirs();
@@ -271,7 +287,7 @@ public class BMPCLocalLauncher {
      *
      * @param file File/Directory to delete
      */
-    private static void delete(File file) {
+    private synchronized static void delete(File file) {
         // Check if file is directory
         if (file.isDirectory()) {
             // Get all files in the folder
