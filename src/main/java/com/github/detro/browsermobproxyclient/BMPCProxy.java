@@ -390,6 +390,18 @@ public class BMPCProxy {
     }
 
     /**
+     * No traffic has passed through this proxy yet.
+     *
+     * This means that no HAR has been created yet and no traffic has
+     * been recoreded yet either.
+     *
+     * @return "true" if it has not been used yet.
+     */
+    public boolean notUsedYet() {
+        return null == har();
+    }
+
+    /**
      * Closes the Proxy and releases the Proxy Client resources (ex. HTTPClient).
      *
      * After this call the Proxy Client is rendered unusable and references

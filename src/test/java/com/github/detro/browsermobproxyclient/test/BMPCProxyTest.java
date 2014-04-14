@@ -175,4 +175,13 @@ public class BMPCProxyTest {
         proxy.close();
         upstreamProxy.close();
     }
+
+    @Test
+    public void shouldKnowIfHasBeenUsedYet() {
+        BMPCProxy proxy = new BMPCProxy(BMOB_API_HOST, BMOB_API_PORT);
+
+        assertTrue(proxy.notUsedYet());
+        proxy.newHar();
+        assertFalse(proxy.notUsedYet());
+    }
 }
