@@ -54,6 +54,7 @@ project.ext {
     jsonPathVersion         = "0.9.1"
     seleniumVersion         = "2.40.0"
     httpclientVersion       = "4.3.3"
+    phantomjsdriverVersion  = "1.1.0"
 }
 
 dependencies {
@@ -63,6 +64,7 @@ dependencies {
     compile "org.apache.httpcomponents:httpclient:$httpclientVersion"
 
     testCompile "org.testng:testng:$testngVersion"
+    testCompile "com.github.detro.ghostdriver:phantomjsdriver:$phantomjsdriverVersion"
 }
 
 tasks.withType(JavaExec) {

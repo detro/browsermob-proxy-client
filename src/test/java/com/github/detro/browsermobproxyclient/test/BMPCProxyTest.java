@@ -188,5 +188,101 @@ public class BMPCProxyTest {
         assertTrue(proxy.notUsedYet());
         proxy.newHar();
         assertFalse(proxy.notUsedYet());
+        proxy.close();
+    }
+
+    private static String EXAMPLE_TARGET_SITE = "http://docs.travis-ci.com/";
+    private static String EXAMPLE_TARGET_HAR_FILE = "docs.travis-ci.har.json";
+
+    @Test
+    public void shouldReportDriverTraffic() {
+        BMPCProxy proxy = new BMPCProxy(BMOB_API_HOST, BMOB_API_PORT);
+
+        // Add proxy to capabilities
+        DesiredCapabilities caps = DesiredCapabilities.phantomjs();
+        caps.setCapability(CapabilityType.PROXY, proxy.asSeleniumProxy());
+
+        // Create driver with capabilities
+        PhantomJSDriver driver = new PhantomJSDriver(caps);
+        assertNull(proxy.newHar());
+        driver.get(EXAMPLE_TARGET_SITE);
+
+        // Let's check the HAR contains what we expect
+        JsonObject har = proxy.har();
+        assertTrue(har.getAsJsonObject("log").getAsJsonArray("entries").size() > 0);
+        assertEquals(har.getAsJsonObject("log").getAsJsonArray("pages").size(), 1);
+        assertEquals(har.getAsJsonObject("log").getAsJsonObject("creator").get("name").getAsString(), "BrowserMob Proxy");
+        assertEquals(har.getAsJsonObject("log").getAsJsonObject("browser").get("name").getAsString(), "PhantomJS");
+
+        // Close proxy and driver
+        driver.quit();
+        proxy.close();
+    }
+
+    @Test
+    public void shouldSaveDriverTrafficToFile() throws FileNotFoundException, InterruptedException {
+        BMPCProxy proxy = new BMPCProxy(BMOB_API_HOST, BMOB_API_PORT);
+
+        // Add proxy to capabilities
+        DesiredCapabilities caps = DesiredCapabilities.phantomjs();
+        caps.setCapability(CapabilityType.PROXY, proxy.asSeleniumProxy());
+
+        // Create driver with capabilities
+        PhantomJSDriver driver = new PhantomJSDriver(caps);
+        assertNull(proxy.newHar());
+        driver.get(EXAMPLE_TARGET_SITE);
+        // Quit driver to stop it from generating more traffic
+        driver.quit();
+
+        // Store HAR content to file
+        proxy.harToFile(".", EXAMPLE_TARGET_HAR_FILE);
+
+        // Let's check the HAR saved on file mathes the one in memory
+        String harInMemory = proxy.har().toString();
+        File harFile = new File(EXAMPLE_TARGET_HAR_FILE);
+        harFile.deleteOnExit();
+        String harOnFile = new Scanner(harFile).useDelimiter("\\A").next();
+        assertEquals(harOnFile, harInMemory);
+
+        // Close proxy
+        proxy.close();
+    }
+
+    @Test
+    public void shouldReportEventFiringDriverTraffic() {
+        final BMPCProxy proxy = new BMPCProxy(BMOB_API_HOST, BMOB_API_PORT);
+
+        // Add proxy to capabilities
+        DesiredCapabilities caps = DesiredCapabilities.phantomjs();
+        caps.setCapability(CapabilityType.PROXY, proxy.asSeleniumProxy());
+
+        // Create Event Firing Driver with capabilities
+        EventFiringWebDriver eventFiringDriver = new EventFiringWebDriver(new PhantomJSDriver(caps));
+        // Register listeners for "beforeNavigateTo"
+        eventFiringDriver.register(new AbstractWebDriverEventListener() {
+            @Override
+            public void beforeNavigateTo(String s, WebDriver webDriver) {
+                // Mark/tag/name Har Pages
+                if (proxy.notUsedYet()) {
+                    proxy.newHar("Test Page 1");
+                } else {
+                    // Next page in the test
+                    proxy.newPage(); //< use default name given by BrowserMob Proxy (i.e. "Page N")
+                }
+            }
+        });
+        // Load url
+        eventFiringDriver.get(EXAMPLE_TARGET_SITE);
+
+        // Let's check the HAR contains what we expect
+        JsonObject har = proxy.har();
+        assertTrue(har.getAsJsonObject("log").getAsJsonArray("entries").size() > 0);
+        assertEquals(har.getAsJsonObject("log").getAsJsonArray("pages").size(), 1);
+        assertEquals(har.getAsJsonObject("log").getAsJsonObject("creator").get("name").getAsString(), "BrowserMob Proxy");
+        assertEquals(har.getAsJsonObject("log").getAsJsonObject("browser").get("name").getAsString(), "PhantomJS");
+
+        // Close proxy and driver
+        eventFiringDriver.quit();
+        proxy.close();
     }
 }
