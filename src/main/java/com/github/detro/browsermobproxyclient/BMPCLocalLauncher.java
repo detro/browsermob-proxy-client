@@ -58,7 +58,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  * library. This class takes care of installing/uninstalling (zip/delete) it.
  * <p/>
  *
- * NOTE: Only one Local BrowserMob Proxy running per host is supported.
+ * NOTE: Only one Local BrowserMob Proxy running per host is supported,
+ * as this is how BrowserMob Proxy is designed to work.
  * Launching more then one will be ignored in the current implementation.
  */
 public class BMPCLocalLauncher {
@@ -80,7 +81,10 @@ public class BMPCLocalLauncher {
 
     /**
      * Start Local BrowserMob Proxy.
+     *
      * It will also install it if not installed yet.
+     * In case client code doesn't, the BrowserMob Proxy process will be
+     * shutdown with the JVM (i.e. Runtime Shutdown Hook).
      */
     public synchronized static void start() {
         start(BMP_LOCAL_DEFAULT_PORT);
@@ -88,7 +92,10 @@ public class BMPCLocalLauncher {
 
     /**
      * Start Local BrowserMob Proxy.
+     *
      * It will also install it if not installed yet.
+     * In case client code doesn't, the BrowserMob Proxy process will be
+     * shutdown with the JVM (i.e. Runtime Shutdown Hook).
      *
      * @param port Port to which BrowserMob Proxy needs to bind it's API
      */
@@ -129,6 +136,15 @@ public class BMPCLocalLauncher {
         } catch (IOException | UrlChecker.TimeoutException e) {
             throw new BMPCLocalStartStopException(failStartExceptionMsg, e);
         }
+
+        // Register JVM Shutdown Hook to ensure we stop the
+        // Local BrowserMob Proxy if client code doesn't
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                BMPCLocalLauncher.stop();
+            }
+        }));
     }
 
     /**
