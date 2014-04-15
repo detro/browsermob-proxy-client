@@ -39,20 +39,15 @@ import static org.testng.Assert.*;
 
 public class BMPCProxyTest {
 
-    public static final String BMOB_API_HOST = "localhost";
+    public static String BMOB_API_HOST;
     public static int BMOB_API_PORT;
 
     @BeforeClass
     public void startLocalBMP() {
         BMPCLocalLauncher.install();
         BMPCLocalLauncher.start();
+        BMOB_API_HOST = BMPCLocalLauncher.host();
         BMOB_API_PORT = BMPCLocalLauncher.port();
-    }
-
-    @AfterClass
-    public void stopLocalBMP() {
-        BMPCLocalLauncher.stop();
-        BMPCLocalLauncher.uninstall();
     }
 
     @Test(expectedExceptions = BMPCUnableToConnectException.class)

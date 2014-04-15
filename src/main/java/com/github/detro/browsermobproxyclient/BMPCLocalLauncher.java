@@ -189,6 +189,18 @@ public class BMPCLocalLauncher {
     }
 
     /**
+     * Return the host on which Local BrowserMob Proxy is running.
+     *
+     * Of course, this is just "localhost" most of the time.
+     * TODO Add support for hostname-binding (instead of just localhost)
+     *
+     * @return "localhost" (in this implementation, hardcoded)
+     */
+    public static String host() {
+        return "localhost";
+    }
+
+    /**
      * Is a Local instance of BrowserMob Proxy installed?
      *
      * @return Returns "true" if a Local BrowserMob Proxy is installed,
@@ -322,6 +334,17 @@ public class BMPCLocalLauncher {
             // Delete the file if it is not a folder
             file.delete();
         }
+    }
+
+    /**
+     * Create a BMPCManager based on a running Local BrowserMob Proxy.
+     * It will start the Local BrowserMob Proxy as well, if not running already.
+     *
+     * @return A ready to use BMPCManager
+     */
+    public static BMPCManager createManager() {
+        start();
+        return new BMPCDefaultManager(BMPCLocalLauncher.host(), BMPCLocalLauncher.port());
     }
 
 }

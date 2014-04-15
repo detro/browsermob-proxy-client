@@ -28,6 +28,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.github.detro.browsermobproxyclient.test;
 
 import com.github.detro.browsermobproxyclient.BMPCLocalLauncher;
+import com.github.detro.browsermobproxyclient.BMPCManager;
 import com.github.detro.browsermobproxyclient.exceptions.BMPCLocalNotInstallerException;
 import org.testng.annotations.Test;
 
@@ -90,5 +91,23 @@ public class BMPCLocalLauncherTest {
         BMPCLocalLauncher.start();
         BMPCLocalLauncher.start();
         BMPCLocalLauncher.start();
+    }
+
+    @Test
+    public void shouldCreateABMPCManager() {
+        BMPCManager man = BMPCLocalLauncher.createManager();
+        int alreadyRunningProxies = man.getOpenProxies().size();
+
+        // Create 5 proxies
+        man.createProxy();
+        man.createProxy();
+        man.createProxy();
+        man.createProxy();
+        man.createProxy();
+
+        assertEquals(man.getOpenProxies().size(), alreadyRunningProxies + 5);
+        man.closeAll();
+        BMPCLocalLauncher.stop();
+        BMPCLocalLauncher.uninstall();
     }
 }
