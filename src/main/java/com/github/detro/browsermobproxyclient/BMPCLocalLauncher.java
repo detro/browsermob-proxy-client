@@ -167,13 +167,15 @@ public class BMPCLocalLauncher {
      * Stop Local BrowserMob proxy
      */
     public synchronized static void stop() {
-        try {
-            BMPProcess.destroy();
-            BMPProcess.waitFor();
-            BMPProcess = null;
-            BMPPort = -1;
-        } catch (InterruptedException ie) {
-            throw new BMPCLocalStartStopException("Failed to stop Local BrowserMob Proxy", ie);
+        if (isRunning()) {
+            try {
+                BMPProcess.destroy();
+                BMPProcess.waitFor();
+                BMPProcess = null;
+                BMPPort = -1;
+            } catch (InterruptedException ie) {
+                throw new BMPCLocalStartStopException("Failed to stop Local BrowserMob Proxy", ie);
+            }
         }
     }
 
