@@ -13,18 +13,20 @@ Javadocs for this library can be found [here](https://cdn.rawgit.com/detro/brows
 
 ## Include in your project (via Maven Central)
 
+To find out available releases of BrowserMob Proxy Client, please check [search.maven.org](http://search.maven.org/#search%7Cga%7C1%7Cbrowsermob-proxy-client).
+
 ### Maven
 ```xml
 <dependency>
     <groupId>com.github.detro</groupId>
     <artifactId>browsermob-proxy-client</artifactId>
-    <version>0.0.4</version>
+    <version>LATEST_VERSION</version>
 </dependency>
 ```
 
 ### Grails / Gradle
 ```groovy
-compile 'com.github.detro:browsermob-proxy-client:0.0.4'
+compile 'com.github.detro:browsermob-proxy-client:LATEST_VERSION'
 ```
 
 ### Others
