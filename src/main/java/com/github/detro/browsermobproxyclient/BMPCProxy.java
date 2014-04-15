@@ -31,7 +31,10 @@ import com.github.detro.browsermobproxyclient.exceptions.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import org.apache.http.*;
+import org.apache.http.Consts;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
@@ -41,8 +44,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.openqa.selenium.Proxy;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -194,22 +196,14 @@ public class BMPCProxy {
     public Proxy asSeleniumProxy() {
         Proxy seleniumProxyConfig = new Proxy();
 
-        seleniumProxyConfig.setHttpProxy(asHttpProxy());
+        seleniumProxyConfig.setProxyType(Proxy.ProxyType.MANUAL);
+        seleniumProxyConfig.setHttpProxy(asHostAndPort());
 
         return seleniumProxyConfig;
     }
 
     /**
-     * Returns HTTP URL to this Proxy
-     *
-     * @return HTTP URL to this Proxy
-     */
-    public String asHttpProxy() {
-        return String.format("http://%s", asHostAndPort());
-    }
-
-    /**
-     * Returns "[HOST]:[PORT]" of this Proxy
+     * Returns "[HOST]:[PORT]" to this Proxy
      *
      * @return "[HOST]:[PORT]" of this Proxy
      */
@@ -386,6 +380,33 @@ public class BMPCProxy {
             return har;
         } catch (URISyntaxException|IOException e) {
             throw new BMPCUnableToCreateHarException(e);
+        }
+    }
+
+    /**
+     * Store current HAR content to file.
+     * File, if it exists, will be overwritten with HAR content.
+     *
+     * @param destinationDir Path to destination Directory
+     * @param destinationFile Path to destination File
+     */
+    public void harToFile(String destinationDir, String destinationFile) {
+        // Prepare HAR destination directory
+        File harDestinationDir = new File(destinationDir);
+        if (!harDestinationDir.exists()) harDestinationDir.mkdirs();
+
+        // Store HAR to disk
+        PrintWriter harDestinationFileWriter = null;
+        try {
+            harDestinationFileWriter = new PrintWriter(destinationFile);
+            harDestinationFileWriter.print(this.har().toString());
+        } catch (FileNotFoundException e) {
+            throw new BMPCUnableToSaveHarToFileException(e);
+        } finally {
+            if (null != harDestinationFileWriter) {
+                harDestinationFileWriter.flush();
+                harDestinationFileWriter.close();
+            }
         }
     }
 

@@ -31,9 +31,19 @@ import com.github.detro.browsermobproxyclient.BMPCLocalLauncher;
 import com.github.detro.browsermobproxyclient.BMPCProxy;
 import com.github.detro.browsermobproxyclient.exceptions.BMPCUnableToConnectException;
 import com.google.gson.JsonObject;
-import org.testng.annotations.AfterClass;
+import org.openqa.selenium.Proxy;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.phantomjs.PhantomJSDriver;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
+import org.openqa.selenium.support.events.EventFiringWebDriver;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 import static org.testng.Assert.*;
 
@@ -152,9 +162,9 @@ public class BMPCProxyTest {
         BMPCProxy proxy = new BMPCProxy(BMOB_API_HOST, BMOB_API_PORT);
 
         assertEquals(proxy.getAPIHost(), BMOB_API_HOST);
-        int port = proxy.getProxyPort();
 
-        assertEquals(proxy.asSeleniumProxy().getHttpProxy(), "http://" + BMOB_API_HOST + ":" + port);
+        assertEquals(proxy.asSeleniumProxy().getProxyType(), Proxy.ProxyType.MANUAL);
+        assertEquals(proxy.asSeleniumProxy().getHttpProxy(), BMOB_API_HOST + ":" + proxy.getProxyPort());
 
         proxy.close();
     }
