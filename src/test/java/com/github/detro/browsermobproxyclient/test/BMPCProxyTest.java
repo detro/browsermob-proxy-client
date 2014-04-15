@@ -30,6 +30,7 @@ package com.github.detro.browsermobproxyclient.test;
 import com.github.detro.browsermobproxyclient.BMPCLocalLauncher;
 import com.github.detro.browsermobproxyclient.BMPCProxy;
 import com.github.detro.browsermobproxyclient.exceptions.BMPCUnableToConnectException;
+import com.google.common.io.Files;
 import com.google.gson.JsonObject;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
@@ -43,6 +44,7 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Scanner;
 
 import static org.testng.Assert.*;
@@ -61,7 +63,7 @@ public class BMPCProxyTest {
     }
 
     @Test(expectedExceptions = BMPCUnableToConnectException.class)
-    public void shouldFaileIfHostOrPortAreWrong() {
+    public void shouldFailIfHostOrPortAreWrong() {
         new BMPCProxy("does.not.exist", 88888);
     }
 
@@ -220,7 +222,7 @@ public class BMPCProxyTest {
     }
 
     @Test
-    public void shouldSaveDriverTrafficToFile() throws FileNotFoundException, InterruptedException {
+    public void shouldSaveDriverTrafficToFile() throws FileNotFoundException, InterruptedException, IOException {
         BMPCProxy proxy = new BMPCProxy(BMOB_API_HOST, BMOB_API_PORT);
 
         // Add proxy to capabilities
@@ -235,14 +237,16 @@ public class BMPCProxyTest {
         driver.quit();
 
         // Store HAR content to file
-        proxy.harToFile(".", EXAMPLE_TARGET_HAR_FILE);
+        File tempDir = Files.createTempDir();
+        proxy.harToFile(tempDir.getAbsolutePath(), EXAMPLE_TARGET_HAR_FILE);
 
-        // Let's check the HAR saved on file mathes the one in memory
+        // Check the HAR saved on file matches the one in memory
         String harInMemory = proxy.har().toString();
-        File harFile = new File(EXAMPLE_TARGET_HAR_FILE);
-        harFile.deleteOnExit();
-        String harOnFile = new Scanner(harFile).useDelimiter("\\A").next();
-        assertEquals(harOnFile, harInMemory);
+        File harFile = new File(tempDir.getAbsolutePath() + File.separator + EXAMPLE_TARGET_HAR_FILE);
+        String harInFile = new Scanner(harFile).useDelimiter("\\A").next();
+        assertEquals(harInFile, harInMemory);
+        harFile.delete();
+        tempDir.delete();
 
         // Close proxy
         proxy.close();

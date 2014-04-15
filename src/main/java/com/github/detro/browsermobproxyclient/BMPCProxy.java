@@ -398,7 +398,8 @@ public class BMPCProxy {
         // Store HAR to disk
         PrintWriter harDestinationFileWriter = null;
         try {
-            harDestinationFileWriter = new PrintWriter(destinationFile);
+            harDestinationFileWriter = new PrintWriter(
+                    destinationDir + File.separator + destinationFile);
             harDestinationFileWriter.print(this.har().toString());
         } catch (FileNotFoundException e) {
             throw new BMPCUnableToSaveHarToFileException(e);
