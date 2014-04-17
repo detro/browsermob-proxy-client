@@ -29,6 +29,7 @@ package com.github.detro.browsermobproxyclient.test;
 
 import com.github.detro.browsermobproxyclient.BMPCLocalLauncher;
 import com.github.detro.browsermobproxyclient.BMPCProxy;
+import com.github.detro.browsermobproxyclient.exceptions.BMPCUnableToCloseProxyException;
 import com.github.detro.browsermobproxyclient.exceptions.BMPCUnableToConnectException;
 import com.google.common.io.Files;
 import com.google.gson.JsonObject;
@@ -134,7 +135,7 @@ public class BMPCProxyTest {
         proxy.close();
     }
 
-    @Test(expectedExceptions = IllegalStateException.class)
+    @Test(expectedExceptions = BMPCUnableToCloseProxyException.class)
     public void shouldClose() {
         BMPCProxy proxy = new BMPCProxy(BMOB_API_HOST, BMOB_API_PORT);
 

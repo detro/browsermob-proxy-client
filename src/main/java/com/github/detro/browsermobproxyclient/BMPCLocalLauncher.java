@@ -27,20 +27,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.github.detro.browsermobproxyclient;
 
-import com.github.detro.browsermobproxyclient.exceptions.BMPCLocalNotInstallerException;
+import com.github.detro.browsermobproxyclient.exceptions.BMPCLocalNotInstalledException;
 import com.github.detro.browsermobproxyclient.exceptions.BMPCLocalStartStopException;
 import com.github.detro.browsermobproxyclient.exceptions.BMPCUnexpectedErrorException;
 import org.openqa.selenium.net.PortProber;
 import org.openqa.selenium.net.UrlChecker;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -77,6 +71,7 @@ public class BMPCLocalLauncher {
     private static final int BMP_LOCAL_DEFAULT_PORT = 8080;
 
     private static Process BMPProcess = null;
+    private static InputStream BMPProcessStdOut = null;
     private static int BMPPort = -1;
 
     /**
@@ -121,8 +116,8 @@ public class BMPCLocalLauncher {
                         "-port",
                         String.valueOf(BMPPort))
                     .redirectErrorStream(true)
-                    .redirectOutput(new File(BMP_LOCAL_LOG_FILE))
                     .start();
+            BMPProcessStdOut = BMPProcess.getInputStream();
 
             // Wait for Proxy to start accepting requests
             new UrlChecker().waitUntilAvailable(
@@ -133,9 +128,36 @@ public class BMPCLocalLauncher {
             if (!isRunning()) {
                 throw new BMPCLocalStartStopException(failStartExceptionMsg);
             }
-        } catch (IOException | UrlChecker.TimeoutException e) {
+        } catch (Exception e) {
             throw new BMPCLocalStartStopException(failStartExceptionMsg, e);
         }
+
+        // Launch a Thread to output Local BrowserMob Proxy output to file
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // Prepare input and output
+                    String lineSeparator = System.getProperty("line.separator");
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(BMPProcessStdOut));
+                    BufferedWriter writer = new BufferedWriter(new FileWriter(BMP_LOCAL_LOG_FILE, true));
+
+                    // Mark beginning of this Log
+                    writer.write("*** Local BrowserMob Proxy STARTED ***" + lineSeparator);
+
+                    while(BMPCLocalLauncher.isRunning()) {
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            writer.write(line + lineSeparator);
+                            writer.flush();
+                        }
+                        Thread.currentThread().sleep(250);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
 
         // Register JVM Shutdown Hook to ensure we stop the
         // Local BrowserMob Proxy if client code doesn't
@@ -169,11 +191,13 @@ public class BMPCLocalLauncher {
     public synchronized static void stop() {
         if (isRunning()) {
             try {
+                BMPProcessStdOut.close();
                 BMPProcess.destroy();
                 BMPProcess.waitFor();
                 BMPProcess = null;
+                BMPProcessStdOut = null;
                 BMPPort = -1;
-            } catch (InterruptedException ie) {
+            } catch (Exception ie) {
                 throw new BMPCLocalStartStopException("Failed to stop Local BrowserMob Proxy", ie);
             }
         }
@@ -227,7 +251,7 @@ public class BMPCLocalLauncher {
 
                 // Check there is an installed version
                 installedVersion();
-            } catch (BMPCLocalNotInstallerException | IOException e) {
+            } catch (Exception e) {
                 throw new BMPCUnexpectedErrorException("Installation failed", e);
             }
         }
@@ -251,11 +275,24 @@ public class BMPCLocalLauncher {
      *         Please use BMPCLocalLauncher#isInstalled() to check first.
      */
     public synchronized static String installedVersion() {
+        BufferedReader versionReader = null;
         try {
-            return Files.readAllLines(Paths.get(BMP_LOCAL_VERSION_FILE), Charset.forName("UTF-8")).get(0);
-        } catch (IOException e) {
-            throw new BMPCLocalNotInstallerException(
+            versionReader = new BufferedReader(new FileReader(BMP_LOCAL_VERSION_FILE));
+
+            // Read version and verify it's there
+            String version = versionReader.readLine();
+            if (null == version) throw new Exception();
+
+            return version;
+        } catch(Exception e) {
+            throw new BMPCLocalNotInstalledException(
                     "Version file not found: " + BMP_LOCAL_VERSION_FILE);
+        } finally {
+            try {
+                if (null != versionReader) versionReader.close();
+            } catch (IOException e) {
+                // Do nothing here
+            }
         }
     }
 

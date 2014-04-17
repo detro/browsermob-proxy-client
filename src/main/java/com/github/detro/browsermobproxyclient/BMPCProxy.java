@@ -45,7 +45,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.openqa.selenium.Proxy;
 
 import java.io.*;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -301,7 +300,7 @@ public class BMPCProxy {
             response.close();
 
             return previousHar;
-        } catch (URISyntaxException|IOException e) {
+        } catch (Exception e) {
             throw new BMPCUnableToCreateHarException(e);
         }
     }
@@ -349,7 +348,7 @@ public class BMPCProxy {
             // Close HTTP Response
             response.close();
 
-        } catch (URISyntaxException|IOException e) {
+        } catch (Exception e) {
             throw new BMPCUnableToCreateHarException(e);
         }
     }
@@ -378,7 +377,7 @@ public class BMPCProxy {
             response.close();
 
             return har;
-        } catch (URISyntaxException|IOException e) {
+        } catch (Exception e) {
             throw new BMPCUnableToCreateHarException(e);
         }
     }
@@ -452,7 +451,7 @@ public class BMPCProxy {
 
             // Close HTTP Client
             HTTPclient.close();
-        } catch (URISyntaxException|IOException e) {
+        } catch (Exception e) {
             throw new BMPCUnableToCloseProxyException(e);
         }
     }

@@ -29,7 +29,7 @@ package com.github.detro.browsermobproxyclient.test;
 
 import com.github.detro.browsermobproxyclient.BMPCLocalLauncher;
 import com.github.detro.browsermobproxyclient.BMPCManager;
-import com.github.detro.browsermobproxyclient.exceptions.BMPCLocalNotInstallerException;
+import com.github.detro.browsermobproxyclient.exceptions.BMPCLocalNotInstalledException;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -61,7 +61,7 @@ public class BMPCLocalLauncherTest {
         assertFalse(BMPCLocalLauncher.isInstalled());
     }
 
-    @Test(expectedExceptions = BMPCLocalNotInstallerException.class)
+    @Test(expectedExceptions = BMPCLocalNotInstalledException.class)
     public void shouldThrowIfVersionIsRequestedButLocalBrowserMobProxyNotInstalled() {
         BMPCLocalLauncher.uninstall();
         BMPCLocalLauncher.installedVersion();

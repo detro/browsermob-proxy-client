@@ -43,7 +43,6 @@ import org.apache.http.impl.client.HttpClients;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.Set;
@@ -114,7 +113,7 @@ public class BMPCDefaultManager implements BMPCManager {
             for (JsonElement proxy : proxyList) {
                 openProxiesPorts.add(proxy.getAsJsonObject().getAsJsonPrimitive("port").getAsInt());
             }
-        } catch (URISyntaxException |IOException e) {
+        } catch (Exception e) {
             throw new BMPCUnexpectedErrorException(e);
         }
 

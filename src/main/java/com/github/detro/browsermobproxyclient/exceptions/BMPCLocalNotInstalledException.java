@@ -27,17 +27,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.github.detro.browsermobproxyclient.exceptions;
 
-public class BMPCLocalNotInstallerException extends RuntimeException {
+public class BMPCLocalNotInstalledException extends RuntimeException {
 
-    public BMPCLocalNotInstallerException(String message) {
+    public BMPCLocalNotInstalledException(String message) {
         super(message);
     }
 
-    public BMPCLocalNotInstallerException(Throwable throwable) {
+    public BMPCLocalNotInstalledException(Throwable throwable) {
         super(throwable);
     }
 
-    public BMPCLocalNotInstallerException(String message, Throwable throwable) {
+    public BMPCLocalNotInstalledException(String message, Throwable throwable) {
         super(message, throwable);
     }
 }
