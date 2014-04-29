@@ -25,8 +25,9 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.detro.browsermobproxyclient;
+package com.github.detro.browsermobproxyclient.manager;
 
+import com.github.detro.browsermobproxyclient.BMPCProxy;
 import com.github.detro.browsermobproxyclient.exceptions.BMPCInvalidJsonException;
 import com.github.detro.browsermobproxyclient.exceptions.BMPCUnableToParseJsonResponseException;
 import com.github.detro.browsermobproxyclient.exceptions.BMPCUnexpectedErrorException;

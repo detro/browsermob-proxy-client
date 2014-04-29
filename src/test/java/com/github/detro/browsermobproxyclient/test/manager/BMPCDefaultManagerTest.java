@@ -25,11 +25,11 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-package com.github.detro.browsermobproxyclient.test;
+package com.github.detro.browsermobproxyclient.test.manager;
 
-import com.github.detro.browsermobproxyclient.BMPCDefaultManager;
+import com.github.detro.browsermobproxyclient.manager.BMPCDefaultManager;
 import com.github.detro.browsermobproxyclient.BMPCLocalLauncher;
-import com.github.detro.browsermobproxyclient.BMPCManager;
+import com.github.detro.browsermobproxyclient.manager.BMPCManager;
 import com.github.detro.browsermobproxyclient.BMPCProxy;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -44,9 +44,9 @@ public class BMPCDefaultManagerTest {
     @BeforeClass
     public void startLocalBMP() {
         BMPCLocalLauncher.install();
-        BMPCLocalLauncher.start();
-        BMOB_API_HOST = BMPCLocalLauncher.host();
-        BMOB_API_PORT = BMPCLocalLauncher.port();
+        BMPCManager manager = BMPCLocalLauncher.launchOnRandomPort();
+        BMOB_API_HOST = manager.getAPIHost();
+        BMOB_API_PORT = manager.getAPIPort();
     }
 
     @Test

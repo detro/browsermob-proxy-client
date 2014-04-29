@@ -28,33 +28,33 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.github.detro.browsermobproxyclient;
 
 import com.github.detro.browsermobproxyclient.exceptions.BMPCLocalNotInstalledException;
-import com.github.detro.browsermobproxyclient.exceptions.BMPCLocalStartStopException;
 import com.github.detro.browsermobproxyclient.exceptions.BMPCUnexpectedErrorException;
+import com.github.detro.browsermobproxyclient.manager.BMPCLocalManager;
 import org.openqa.selenium.net.PortProber;
-import org.openqa.selenium.net.UrlChecker;
 
 import java.io.*;
-import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
 /**
- * Utility class that takes care of Starting and Stopping a Local BrowserMob Proxy.
+ * Utility class that takes care of Installing/Uninstalling Local Browser Mob Proxy as well as Starting and Stopping it.
  * <p/>
  *
  * "Local" means that it's located inside the Current User directory, inside
  * <code>.browsermob-proxy-client/browsermob-proxy-local</code>.
  * <p/>
  *
- * A version of BrowserMob Proxy is contained within the resources of this
- * library. This class takes care of installing/uninstalling (zip/delete) it.
+ * Using the "Local installation", this class can launch multiple "Managers".
+ * Precisely, the various running BrowserMob Proxies are represented by
+ * {@code BMPCLocalManager}.
  * <p/>
  *
- * NOTE: Only one Local BrowserMob Proxy running per host is supported,
- * as this is how BrowserMob Proxy is designed to work.
- * Launching more then one will be ignored in the current implementation.
+ * Those instances are started when created, but it's left to the client
+ * code to deal with cleanup.
+ * <p/>
+ *
+ * A version of BrowserMob Proxy is contained within the resources of this
+ * library. This class takes care of installing/uninstalling (zip/delete) it.
  */
 public class BMPCLocalLauncher {
 
@@ -68,160 +68,33 @@ public class BMPCLocalLauncher {
     private static final String BMP_LOCAL_EXEC_UNIX = BMP_LOCAL_INSTALL_DIR + File.separator + "bin" + File.separator + "browsermob-proxy";
     private static final String BMP_LOCAL_EXEC_WIN = BMP_LOCAL_INSTALL_DIR + File.separator + "bin" + File.separator + "browsermob-proxy.bat";
 
-    private static final int BMP_LOCAL_DEFAULT_PORT = 8080;
-
-    private static Process BMPProcess = null;
-    private static InputStream BMPProcessStdOut = null;
-    private static int BMPPort = -1;
+    public static final int BMP_LOCAL_DEFAULT_PORT = 8080;
 
     /**
-     * Start Local BrowserMob Proxy.
-     *
-     * It will also install it if not installed yet.
-     * In case client code doesn't, the BrowserMob Proxy process will be
-     * shutdown with the JVM (i.e. Runtime Shutdown Hook).
+     * See {@link com.github.detro.browsermobproxyclient.BMPCLocalLauncher#launch(int)}
      */
-    public synchronized static void start() {
-        start(BMP_LOCAL_DEFAULT_PORT);
+    public static BMPCLocalManager launchOnRandomPort() {
+        return launch(PortProber.findFreePort());
     }
 
     /**
-     * Start Local BrowserMob Proxy.
+     * See {@link com.github.detro.browsermobproxyclient.BMPCLocalLauncher#launch(int)}
+     */
+    public static BMPCLocalManager launchOnDefaultPort() {
+        return launch(BMP_LOCAL_DEFAULT_PORT);
+    }
+
+    /**
+     * Launch Local BrowserMob Proxy and return a BMPCManager to handle it.
      *
      * It will also install it if not installed yet.
-     * In case client code doesn't, the BrowserMob Proxy process will be
-     * shutdown with the JVM (i.e. Runtime Shutdown Hook).
      *
-     * @param port Port to which BrowserMob Proxy needs to bind it's API
+     * @param port Port to bind Local BrowserMob Proxy to
+     * @return Instance of BMPCManager
      */
-    public synchronized static void start(int port) {
-        // No-Op if already running
-        if (isRunning()) return;
-
-        // Ensure Local BrowserMob Proxy is installed
+    public static BMPCLocalManager launch(int port) {
         install();
-
-        final String failStartExceptionMsg = "Failed to start Local BrowserMob Proxy.";
-
-        // Check port we want to bind to is free before continuing
-        if (!PortProber.pollPort(port)) {
-            throw new BMPCLocalStartStopException(failStartExceptionMsg +
-                String.format(" - Port %d is not free", port));
-        }
-        BMPPort = port;
-
-        // Start Local BrowserMob Proxy external process
-        try {
-            BMPProcess = new ProcessBuilder(executablePerOS(),
-                        "-port",
-                        String.valueOf(BMPPort))
-                    .redirectErrorStream(true)
-                    .start();
-            BMPProcessStdOut = BMPProcess.getInputStream();
-
-            // Wait for Proxy to start accepting requests
-            new UrlChecker().waitUntilAvailable(
-                    20, SECONDS,
-                    new URL("http://localhost:" + port + "/proxy"));
-
-            // Throw exception if not running
-            if (!isRunning()) {
-                throw new BMPCLocalStartStopException(failStartExceptionMsg);
-            }
-        } catch (Exception e) {
-            throw new BMPCLocalStartStopException(failStartExceptionMsg, e);
-        }
-
-        // Launch a Thread to output Local BrowserMob Proxy output to file
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    // Prepare input and output
-                    String lineSeparator = System.getProperty("line.separator");
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(BMPProcessStdOut));
-                    BufferedWriter writer = new BufferedWriter(new FileWriter(BMP_LOCAL_LOG_FILE, true));
-
-                    // Mark beginning of this Log
-                    writer.write("*** Local BrowserMob Proxy STARTED ***" + lineSeparator);
-
-                    while(BMPCLocalLauncher.isRunning()) {
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            writer.write(line + lineSeparator);
-                            writer.flush();
-                        }
-                        Thread.currentThread().sleep(250);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-
-        // Register JVM Shutdown Hook to ensure we stop the
-        // Local BrowserMob Proxy if client code doesn't
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            @Override
-            public void run() {
-                BMPCLocalLauncher.stop();
-            }
-        }));
-    }
-
-    /**
-     * Check if Local BrowserMob Proxy is running.
-     *
-     * @return "true" if Local BrowserMob Proxy is running.
-     */
-    public synchronized static boolean isRunning() {
-        if (null == BMPProcess) return false;
-
-        try {
-            BMPProcess.exitValue();
-            return false;
-        } catch(IllegalThreadStateException itse) {
-            return true;
-        }
-    }
-
-    /**
-     * Stop Local BrowserMob proxy
-     */
-    public synchronized static void stop() {
-        if (isRunning()) {
-            try {
-                BMPProcessStdOut.close();
-                BMPProcess.destroy();
-                BMPProcess.waitFor();
-                BMPProcess = null;
-                BMPProcessStdOut = null;
-                BMPPort = -1;
-            } catch (Exception ie) {
-                throw new BMPCLocalStartStopException("Failed to stop Local BrowserMob Proxy", ie);
-            }
-        }
-    }
-
-    /**
-     * Returns the port on which Local BrowserMob Proxy is running.
-     *
-     * @return Port on which Local BrowserMob Proxy is running
-     */
-    public synchronized static int port() {
-        return BMPPort;
-    }
-
-    /**
-     * Return the host on which Local BrowserMob Proxy is running.
-     *
-     * Of course, this is just "localhost" most of the time.
-     * TODO Add support for hostname-binding (instead of just localhost)
-     *
-     * @return "localhost" (in this implementation, hardcoded)
-     */
-    public static String host() {
-        return "localhost";
+        return new BMPCLocalManager(executablePerOS(), BMP_LOCAL_LOG_FILE, port);
     }
 
     /**
@@ -371,17 +244,6 @@ public class BMPCLocalLauncher {
             // Delete the file if it is not a folder
             file.delete();
         }
-    }
-
-    /**
-     * Create a BMPCManager based on a running Local BrowserMob Proxy.
-     * It will start the Local BrowserMob Proxy as well, if not running already.
-     *
-     * @return A ready to use BMPCManager
-     */
-    public static BMPCManager createManager() {
-        start();
-        return new BMPCDefaultManager(BMPCLocalLauncher.host(), BMPCLocalLauncher.port());
     }
 
 }

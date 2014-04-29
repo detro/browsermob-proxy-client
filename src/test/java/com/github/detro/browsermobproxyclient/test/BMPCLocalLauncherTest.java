@@ -28,8 +28,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package com.github.detro.browsermobproxyclient.test;
 
 import com.github.detro.browsermobproxyclient.BMPCLocalLauncher;
-import com.github.detro.browsermobproxyclient.BMPCManager;
+import com.github.detro.browsermobproxyclient.exceptions.BMPCLocalStartStopException;
+import com.github.detro.browsermobproxyclient.manager.BMPCLocalManager;
+import com.github.detro.browsermobproxyclient.manager.BMPCManager;
 import com.github.detro.browsermobproxyclient.exceptions.BMPCLocalNotInstalledException;
+import org.openqa.selenium.net.PortProber;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -67,33 +70,16 @@ public class BMPCLocalLauncherTest {
         BMPCLocalLauncher.installedVersion();
     }
 
-    @Test
-    public void shouldStartAndStop() throws InterruptedException {
-        BMPCLocalLauncher.install();
-
-        assertFalse(BMPCLocalLauncher.isRunning());
-        BMPCLocalLauncher.start();
-        assertTrue(BMPCLocalLauncher.isRunning());
-
-        Thread.currentThread().sleep(3000);
-
-        BMPCLocalLauncher.stop();
-        assertFalse(BMPCLocalLauncher.isRunning());
-
-        BMPCLocalLauncher.uninstall();
-    }
-
-    @Test
-    public void shouldSupportStartingMultipleTimesWithoutIssues() {
-        BMPCLocalLauncher.start();
-        BMPCLocalLauncher.start();
-        BMPCLocalLauncher.start();
-        BMPCLocalLauncher.start();
+    @Test(expectedExceptions = BMPCLocalStartStopException.class)
+    public void shouldFailIfTryingToLaunchOnSamePortMultipleTimes() throws InterruptedException {
+        int aPort = PortProber.findFreePort();
+        BMPCLocalLauncher.launch(aPort);
+        BMPCLocalLauncher.launch(aPort);
     }
 
     @Test
     public void shouldCreateABMPCManager() {
-        BMPCManager man = BMPCLocalLauncher.createManager();
+        BMPCManager man = BMPCLocalLauncher.launchOnRandomPort();
         int alreadyRunningProxies = man.getOpenProxies().size();
 
         // Create 5 proxies
@@ -103,9 +89,14 @@ public class BMPCLocalLauncherTest {
         man.createProxy();
         man.createProxy();
 
+        // Check that all the expected Proxies were cread
         assertEquals(man.getOpenProxies().size(), alreadyRunningProxies + 5);
         man.closeAll();
-        BMPCLocalLauncher.stop();
+
+        // Stop Local proxy
+        ((BMPCLocalManager)man).stop();
+
+        // Uninstall
         BMPCLocalLauncher.uninstall();
     }
 }

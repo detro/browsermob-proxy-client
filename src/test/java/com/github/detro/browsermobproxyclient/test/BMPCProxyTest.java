@@ -31,6 +31,7 @@ import com.github.detro.browsermobproxyclient.BMPCLocalLauncher;
 import com.github.detro.browsermobproxyclient.BMPCProxy;
 import com.github.detro.browsermobproxyclient.exceptions.BMPCUnableToCloseProxyException;
 import com.github.detro.browsermobproxyclient.exceptions.BMPCUnableToConnectException;
+import com.github.detro.browsermobproxyclient.manager.BMPCManager;
 import com.google.common.io.Files;
 import com.google.gson.JsonObject;
 import org.openqa.selenium.Proxy;
@@ -58,9 +59,9 @@ public class BMPCProxyTest {
     @BeforeClass
     public void startLocalBMP() {
         BMPCLocalLauncher.install();
-        BMPCLocalLauncher.start();
-        BMOB_API_HOST = BMPCLocalLauncher.host();
-        BMOB_API_PORT = BMPCLocalLauncher.port();
+        BMPCManager manager = BMPCLocalLauncher.launchOnRandomPort();
+        BMOB_API_HOST = manager.getAPIHost();
+        BMOB_API_PORT = manager.getAPIPort();
     }
 
     @Test(expectedExceptions = BMPCUnableToConnectException.class)
