@@ -397,9 +397,17 @@ public class BMPCProxy {
         // Store HAR to disk
         PrintWriter harDestinationFileWriter = null;
         try {
+            // Prepare Writer
             harDestinationFileWriter = new PrintWriter(
                     destinationDir + File.separator + destinationFile);
-            harDestinationFileWriter.print(this.har().toString());
+
+            // Store HAR if any, otherwise empty file
+            JsonObject har = this.har();
+            if (null != har) {
+                harDestinationFileWriter.print(har.toString());
+            } else {
+                harDestinationFileWriter.print("");
+            }
         } catch (FileNotFoundException e) {
             throw new BMPCUnableToSaveHarToFileException(e);
         } finally {
