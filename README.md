@@ -8,6 +8,16 @@ exclusively via it's REST API.
 ## How it works
 TODO
 
+## Run Build & Tests locally
+
+The build system is based on [Gradle](http://www.gradle.org/):
+```bash
+./gradlew -PossrhUsername -PossrhPassword test
+```
+
+**NOTE:** To run the full suite of tests you also need to have [PhantomJS](http://phantomjs.org/download.html) installed: the tests will assume
+that is available in the `PATH`.
+
 ## Documentation
 Javadocs for this library can be found [here](https://cdn.rawgit.com/detro/browsermob-proxy-client/master/docs/javadoc/index.html).
 
