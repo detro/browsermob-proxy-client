@@ -110,6 +110,9 @@ public class BMPCLocalManager implements BMPCManager {
                         }
                         Thread.currentThread().sleep(250);
                     }
+
+                    reader.close();
+                    writer.close();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -195,7 +198,6 @@ public class BMPCLocalManager implements BMPCManager {
     public synchronized void stop() {
         if (isRunning()) {
             try {
-                stdout.close();
                 process.destroy();
                 process.waitFor();
                 process = null;
