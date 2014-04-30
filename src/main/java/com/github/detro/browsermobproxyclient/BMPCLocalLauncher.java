@@ -61,7 +61,7 @@ public class BMPCLocalLauncher {
     private static final String USER_HOME_DIR = System.getProperty("user.home");
     private static final String BMPC_USER_DIR = USER_HOME_DIR + File.separator + ".browsermob-proxy-client";
 
-    private static final String BMP_LOCAL_ZIP_RES = File.separator + "browsermob-proxy-local.zip";
+    private static final String BMP_LOCAL_ZIP_RES = "/browsermob-proxy-local.zip";
     private static final String BMP_LOCAL_INSTALL_DIR = BMPC_USER_DIR + File.separator + "browsermob-proxy-local";
     private static final String BMP_LOCAL_LOG_FILE = BMPC_USER_DIR + File.separator + "browsermob-proxy-local.log";
     private static final String BMP_LOCAL_VERSION_FILE = BMP_LOCAL_INSTALL_DIR + File.separator + "VERSION.txt";
@@ -104,8 +104,12 @@ public class BMPCLocalLauncher {
      *         "false" otherwise.
      */
     public synchronized static boolean isInstalled() {
-        File installDir = new File(BMP_LOCAL_INSTALL_DIR);
-        return installDir.exists() && installDir.isDirectory();
+        try {
+            installedVersion();
+            return true;
+        } catch (BMPCLocalNotInstalledException nie) {
+            return false;
+        }
     }
 
     /**
