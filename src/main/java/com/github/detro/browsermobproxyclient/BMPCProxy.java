@@ -390,6 +390,17 @@ public class BMPCProxy {
      * @param destinationFile Path to destination File
      */
     public void harToFile(String destinationDir, String destinationFile) {
+        harToFile(this.har(), destinationDir, destinationFile);
+    }
+
+    /**
+     * Utility to store HAR to file.
+     *
+     * @param har JsonObject containing HAR data
+     * @param destinationDir Path to destination Directory
+     * @param destinationFile Path to destination File
+     */
+    public static void harToFile(JsonObject har, String destinationDir, String destinationFile) {
         // Prepare HAR destination directory
         File harDestinationDir = new File(destinationDir);
         if (!harDestinationDir.exists()) harDestinationDir.mkdirs();
@@ -402,7 +413,6 @@ public class BMPCProxy {
                     destinationDir + File.separator + destinationFile);
 
             // Store HAR if any, otherwise empty file
-            JsonObject har = this.har();
             if (null != har) {
                 harDestinationFileWriter.print(har.toString());
             } else {
