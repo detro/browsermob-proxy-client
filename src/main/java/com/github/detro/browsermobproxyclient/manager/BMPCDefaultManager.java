@@ -140,6 +140,11 @@ public class BMPCDefaultManager implements BMPCManager {
         return APIPort;
     }
 
+    @Override
+    public void stop() {
+        // Nothing to do here: this is not a Local BrowserMob Proxy instance.
+    }
+
     private URIBuilder requestURIBuilder() {
         return new URIBuilder()
                 .setScheme("http")

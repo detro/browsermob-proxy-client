@@ -192,24 +192,6 @@ public class BMPCLocalManager implements BMPCManager {
         }
     }
 
-    /**
-     * Stop Local BrowserMob proxy
-     */
-    public synchronized void stop() {
-        if (isRunning()) {
-            try {
-                process.destroy();
-                process.waitFor();
-                process = null;
-                stdout = null;
-            } catch (Exception ie) {
-                throw new BMPCLocalStartStopException(
-                        String.format("Failed to stop Local BrowserMob Proxy on port '%d'", port),
-                        ie);
-            }
-        }
-    }
-
     @Override
     public BMPCProxy createProxy() {
         return defaultManager.createProxy();
@@ -255,4 +237,21 @@ public class BMPCLocalManager implements BMPCManager {
 
         return false;
     }
+
+    @Override
+    public synchronized void stop() {
+        if (isRunning()) {
+            try {
+                process.destroy();
+                process.waitFor();
+                process = null;
+                stdout = null;
+            } catch (Exception ie) {
+                throw new BMPCLocalStartStopException(
+                        String.format("Failed to stop Local BrowserMob Proxy on port '%d'", port),
+                        ie);
+            }
+        }
+    }
+
 }

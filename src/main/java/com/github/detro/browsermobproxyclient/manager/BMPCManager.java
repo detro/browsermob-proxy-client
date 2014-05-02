@@ -76,4 +76,9 @@ public interface BMPCManager {
      * @return Port where BrowserMob Proxy is listening.
      */
     public int getAPIPort();
+
+    /**
+     * Stop the BrowserMob Proxy.
+     */
+    public void stop();
 }
