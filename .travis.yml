@@ -10,3 +10,11 @@ install:
 
 script:
   - ./gradlew -PossrhUsername=none -PossrhPassword=none --info --stacktrace check
+
+notifications:
+  irc:
+    channels:
+      - "irc.freenode.org#browsermob-proxy-client"
+    on_success: always
+    on_failure: always
+    use_notice: true
